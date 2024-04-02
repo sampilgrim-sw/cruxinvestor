@@ -30,43 +30,45 @@ function weightedRandomSelect(items) {
 }
 
 async function populateAdverts() {
-	const slotsMap = new Map(); // SlotId => [{ advert, priority }]
-
-	// Collect adverts and their target slots with priorities
+	const slotElements = document.querySelectorAll(".advert-slot");
 	const adverts = document.querySelectorAll(".adverts .advert");
-	for (const advert of adverts) {
-		const adSlug = advert.getAttribute("data-slug");
-		const priority = parseInt(advert.getAttribute("data-priority"), 10);
-		if (!adSlug) continue;
 
-		const slotIds = await fetchAndExtractSlotIds(adSlug);
-		slotIds.forEach((slotId) => {
-			if (!slotsMap.has(slotId)) slotsMap.set(slotId, []);
-			slotsMap.get(slotId).push({ advert, priority });
-		});
-	}
+	// Prepare advert info
+	const advertInfos = await Promise.all(
+		[...adverts].map(async (advert) => {
+			const adSlug = advert.getAttribute("data-slug");
+			const priority = parseInt(advert.getAttribute("data-priority"), 10);
+			const slotIds = await fetchAndExtractSlotIds(adSlug);
+			return { advert, priority, slotIds };
+		})
+	);
 
-	// Process each slot
-	slotsMap.forEach((adverts, slotId) => {
-		const priorityZeroAdverts = adverts.filter((a) => a.priority === 0);
-		const otherAdverts = adverts.filter((a) => a.priority !== 0);
+	// Process each slot independently
+	slotElements.forEach((slotElement) => {
+		const slotId = slotElement.getAttribute("data-ad-slot");
+		const eligibleAdverts = advertInfos.filter(({ slotIds }) =>
+			slotIds.includes(slotId)
+		);
 
-		// Always select priority 0 adverts, randomly select among others based on weight
+		// Separate priority 0 adverts
+		const priorityZeroAdverts = eligibleAdverts.filter(
+			({ priority }) => priority === 0
+		);
+		const otherAdverts = eligibleAdverts.filter(
+			({ priority }) => priority !== 0
+		);
+
+		// Select advert(s) for the slot
 		const selectedAdverts = [...priorityZeroAdverts];
 		if (otherAdverts.length > 0) {
 			const selectedAdvert = weightedRandomSelect(otherAdverts);
 			if (selectedAdvert) selectedAdverts.push(selectedAdvert);
 		}
 
-		// Find all slots with the matching ID and append the selected adverts to each
-		const slotElements = document.querySelectorAll(
-			`.advert-slot[data-ad-slot="${slotId}"]`
-		);
-		slotElements.forEach((slotElement) => {
-			selectedAdverts.forEach(({ advert }) => {
-				const clonedAdvert = advert.cloneNode(true);
-				slotElement.appendChild(clonedAdvert);
-			});
+		// Append selected adverts to the slot
+		selectedAdverts.forEach(({ advert }) => {
+			const clonedAdvert = advert.cloneNode(true);
+			slotElement.appendChild(clonedAdvert);
 		});
 	});
 }
