@@ -1,3 +1,18 @@
+// Function to check if we're on a Post page and whether ads should be shown. We DON'T show ads if there's exactly ONE related company.
+function shouldShowAds() {
+	// Check if the current page URL matches the form /posts/xxx
+	const isPostPage = /\/posts\/[^\/]+/.test(window.location.pathname);
+	if (!isPostPage) return true; // Not a post page, show ads by default
+
+	// Find the .post-content_companies-list element
+	const companiesList = document.querySelector(".post-content_companies-list");
+	if (!companiesList) return true; // Element not found, show ads
+
+	// Count the direct children of the .post-content_companies-list
+	const childrenCount = companiesList.children.length;
+	return childrenCount !== 1; // Show ads if there are 0 or 2+ children
+}
+
 // Function to fetch the ad campaign page and extract slot IDs
 async function fetchAndExtractSlotIds(adSlug) {
 	const url = `/ad-campaigns/${adSlug}`;
@@ -30,6 +45,9 @@ function weightedRandomSelect(items) {
 }
 
 async function populateAdverts() {
+	// Proceed with the rest of the script only if ads should be shown
+	if (!shouldShowAds()) return;
+
 	const slotElements = document.querySelectorAll(".advert-slot");
 	const adverts = document.querySelectorAll(".adverts .advert");
 
