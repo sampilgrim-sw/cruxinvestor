@@ -1,8 +1,8 @@
-document.addEventListener("DOMContentLoaded", () => {
+function theCon() {
 	setupSplide();
 	getMemberData();
 	setupVideoElements();
-});
+}
 
 function setupSplide() {
 	/* splide defaults */
