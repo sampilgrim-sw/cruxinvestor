@@ -119,18 +119,23 @@ function getMemberData() {
 			if (member.data) {
 				console.log("Logged in member data:", member.data);
 
+				let signUpDate;
 				const signUpDateString = member.data.customFields["sign-up-date"];
-				if (!signUpDateString) {
-					console.error(
-						"Sign-up date is missing or undefined in custom fields."
-					);
-					return;
-				}
 
-				const signUpDate = new Date(signUpDateString);
-				if (isNaN(signUpDate.getTime())) {
-					console.error("Failed to parse sign-up date:", signUpDateString);
-					return;
+				if (signUpDateString) {
+					signUpDate = new Date(signUpDateString);
+					if (isNaN(signUpDate.getTime())) {
+						// console.error("Failed to parse sign-up date:", signUpDateString);
+						signUpDate = new Date(member.data.createdAt); // Fallback to creation date
+						console.log(
+							"Sign-up date is missing or undefined in custom fields, using creation date."
+						);
+					}
+				} else {
+					console.log(
+						"Sign-up date is missing or undefined in custom fields, using creation date."
+					);
+					signUpDate = new Date(member.data.createdAt);
 				}
 
 				const currentDate = new Date();
@@ -147,7 +152,6 @@ function getMemberData() {
 					const releaseTag = post.querySelector(".release-tag_wrapper");
 					const releaseTagText = post.querySelector(".release-tag_text");
 					const postStatus = post.getAttribute("data-post-status");
-					console.log(postStatus);
 
 					if (postStatus !== "available") {
 						releaseTag.removeAttribute("hidden");
@@ -185,69 +189,3 @@ function getMemberData() {
 			console.error("Error fetching member data:", error);
 		});
 }
-
-// function initVimeo() {
-// 	const vimeo = document.getElementsByClassName("vimeo")[0];
-// 	const thumbnail = document.getElementsByClassName("thumbnail")[0];
-// 	// get vimeo id
-// 	const vimeoId = (() => {
-// 		return vimeo.getAttribute("data-vimeo-id");
-// 	})();
-
-// 	// options
-// 	const options = {
-// 		id: vimeoId,
-// 	};
-
-// 	// player constructor initialisation
-// 	const player = new Vimeo.Player(vimeo, options);
-
-// 	player.loadVideo(vimeoId).then(function (id) {
-// 		console.log(`video ${id} has loaded 🥳`);
-// 		vimeo.style.display = "block";
-// 		thumbnail.style.display = "none";
-// 	});
-
-// 	player.on("play", (event) => {
-// 		console.log("video is playing ❤️");
-// 	});
-// 	return player;
-// }
-
-// function trackVimeo(player) {
-// 	// video tracking
-
-// 	// // Find all Vimeo video embeds on the page
-// 	// var iframes = document.querySelectorAll('iframe[src*="vimeo.com"]');
-// 	// var players = [];
-
-// 	// // Initialize a Vimeo Player for each iframe
-// 	// iframes.forEach(function (iframe) {
-// 	// var player = new Vimeo.Player(iframe);
-
-// 	// Store the player in the array to manage multiple videos
-// 	// players.push(player);
-
-// 	// Event listener for time updates
-// 	player.on("timeupdate", function (data) {
-// 		// For example, we track every 10% of the video watched
-// 		var percentageWatched = Math.floor((data.percent * 100) / 10) * 10;
-
-// 		// Log this to the console or use for debugging
-// 		console.log(
-// 			`Member watched ${percentageWatched}% of video ${player.element.id}`
-// 		);
-
-// 		// Send data to Memberstack or your server for persistent storage
-// 		// Adjust the API endpoint/method according to your Memberstack setup
-// 		// MemberStack.onReady.then(function(member) {
-// 		// 	member.updateMetaData({
-// 		// 		videoProgress: {
-// 		// 			[player.element.id]: percentageWatched
-// 		// 		}
-// 		// 	}).then(function(updatedMember) {
-// 		// 		console.log('Progress saved:', updatedMember.meta_data.videoProgress);
-// 		// 	});
-// 		// });
-// 	});
-// }
