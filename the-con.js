@@ -152,6 +152,7 @@ function getMemberData() {
 					const releaseTag = post.querySelector(".release-tag_wrapper");
 					const releaseTagText = post.querySelector(".release-tag_text");
 					const postStatus = post.getAttribute("data-post-status");
+					const newTag = post.querySelector(".postcard_new");
 
 					if (postStatus !== "available") {
 						releaseTag.removeAttribute("hidden");
@@ -159,6 +160,12 @@ function getMemberData() {
 					} else if (membershipDurationWeeks >= postReleaseWeeks) {
 						post.setAttribute("data-post-unlocked", "true");
 						releaseTag.setAttribute("hidden", ""); // Hide tag using hidden attribute
+						// Check if the video's release date is within the last 7 days
+						if ((currentDate - releaseDate) / (1000 * 3600 * 24) <= 7) {
+							newTag.removeAttribute("hidden"); // Show the 'new' tag
+						} else {
+							newTag.setAttribute("hidden", ""); // Hide the 'new' tag
+						}
 					} else {
 						post.setAttribute("data-post-locked", "true");
 						releaseTag.removeAttribute("hidden"); // Show tag by removing hidden attribute
@@ -180,8 +187,10 @@ function getMemberData() {
 				document.querySelectorAll(".post").forEach((post) => {
 					const releaseTag = post.querySelector(".release-tag");
 					const releaseTagText = post.querySelector(".release-tag_text");
+					const newTag = post.querySelector(".postcard_new");
 					releaseTag.removeAttribute("hidden");
 					releaseTagText.textContent = "Coming soon";
+					newTag.setAttribute("hidden", ""); // Hide the 'new' tag
 				});
 			}
 		})
