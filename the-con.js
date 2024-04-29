@@ -149,6 +149,9 @@ function getMemberData() {
 					const releaseDate = new Date(signUpDate.getTime());
 					releaseDate.setDate(releaseDate.getDate() + postReleaseWeeks * 7);
 
+					// add this release date to the post's hidden data
+					post.setAttribute("data-release-date", releaseDate);
+
 					const releaseTag = post.querySelector(".release-tag_wrapper");
 					const releaseTagText = post.querySelector(".release-tag_text");
 					const postStatus = post.getAttribute("data-post-status");
