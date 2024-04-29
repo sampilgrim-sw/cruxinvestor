@@ -2,6 +2,43 @@ function theCon() {
 	setupSplide();
 	getMemberData();
 	setupVideoElements();
+	calculatePostReadTime();
+}
+
+function calculatePostReadTime() {
+	// Attempt to get the article text element
+	const articleElement = document.getElementById("transcript");
+	const readTimeElement = document.getElementById("read-time");
+
+	// Check if the elements exist
+	if (!articleElement) {
+		console.error("Error: Unable to find the article element.");
+		return; // Exit the function if no article element
+	}
+	if (!readTimeElement) {
+		console.error("Error: Unable to find the read time display element.");
+		return; // Exit the function if no read time element
+	}
+
+	// Get the text content from the article element
+	const articleText = articleElement.innerText;
+
+	// Split the text into an array of words
+	const wordsArray = articleText.split(" ");
+
+	// Count the number of words in the array
+	const wordCount = wordsArray.length;
+
+	// Calculate the estimated reading time
+	const wordsPerMinute = 200;
+	const readingTime = Math.ceil(wordCount / wordsPerMinute);
+
+	// Display the reading time in the read time element
+	readTimeElement.innerText = `${readingTime}m read time`;
+
+	console.log(
+		`This article has ${wordCount} words and will take approximately ${readingTime} minute(s) to read.`
+	);
 }
 
 function setupSplide() {
