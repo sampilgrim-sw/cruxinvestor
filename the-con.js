@@ -2,7 +2,8 @@ function theCon() {
 	setupSplide();
 	getMemberData();
 	setupVideoElements();
-	//calculatePostReadTime();
+	calculatePostReadTime();
+	setupLoopElements();
 }
 
 function calculatePostReadTime() {
@@ -150,7 +151,7 @@ function toggleVideoElements(videoElement) {
 }
 
 function initVimeo(vimeoContainer) {
-	const vimeoId = vimeoContainer.getAttribute("data-vimeo-id");
+	const vimeoId = vimeoContainer.getAttribute("data-crux-vimeo-id");
 	const options = { id: vimeoId };
 	const player = new Vimeo.Player(vimeoContainer, options);
 
@@ -262,4 +263,51 @@ function getMemberData() {
 		.catch((error) => {
 			console.error("Error fetching member data:", error);
 		});
+}
+
+function setupLoopElements() {
+	var loops = document.querySelectorAll(".loop");
+
+	loops.forEach(function (loop) {
+		var videoID = loop.getAttribute("data-crux-vimeo-id"); // Assuming data-videoid attribute contains the Vimeo video ID
+		var startSeconds = parseFloat(loop.dataset.startTime); // Assuming data-start attribute
+		var endSeconds = parseFloat(loop.dataset.endTime); // Assuming data-end attribute
+
+		var videoContainer = loop.querySelector(".loop_square.is-video");
+		var imgContainer = loop.querySelector(".loop_square.is-img");
+
+		// Create the iframe dynamically
+		var iframe = document.createElement("iframe");
+		iframe.setAttribute(
+			"src",
+			`https://player.vimeo.com/video/${videoID}?autoplay=1&loop=1&autopause=0&muted=1&background=1`
+		);
+		iframe.setAttribute("frameborder", "0");
+		iframe.setAttribute("allow", "autoplay; fullscreen");
+		iframe.style.width = "100%";
+		iframe.style.height = "100%";
+
+		// Append iframe to the video container
+		videoContainer.appendChild(iframe);
+
+		var player = new Vimeo.Player(iframe);
+
+		// Handling the time update for looping
+		player.on("timeupdate", function (data) {
+			if (data.seconds >= endSeconds) {
+				player.setCurrentTime(startSeconds);
+			}
+		});
+
+		// Ensure we start at the loop beginning every time the video plays
+		player.on("play", function () {
+			player.setCurrentTime(startSeconds);
+		});
+
+		// Handling video ready event to switch opacity
+		player.on("loaded", function () {
+			videoContainer.style.opacity = 1;
+			imgContainer.style.opacity = 0;
+		});
+	});
 }
