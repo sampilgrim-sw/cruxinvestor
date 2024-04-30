@@ -2,7 +2,7 @@ function theCon() {
 	setupSplide();
 	getMemberData();
 	setupVideoElements();
-	calculatePostReadTime();
+	//calculatePostReadTime();
 }
 
 function calculatePostReadTime() {
@@ -64,8 +64,7 @@ function setupSplide() {
 		autoplay: true,
 	};
 
-	/* generic splider implementation */
-	function mount_splide(myClass) {
+	function mount_splide_home(myClass) {
 		let splides = document.querySelectorAll(myClass);
 		for (let i = 0; i < splides.length; i++) {
 			let splideOptions = {
@@ -84,7 +83,31 @@ function setupSplide() {
 			splide.mount();
 		}
 	}
-	mount_splide(".splide.home-playlist");
+	mount_splide_home(".splide.home-playlist");
+
+	function mount_splide_about(myClass) {
+		let splides = document.querySelectorAll(myClass);
+		for (let i = 0; i < splides.length; i++) {
+			let splideOptions = {
+				perPage: 3,
+				gap: "1rem",
+				autoScroll: {
+					speed: 2,
+					pauseOnHover: true,
+				},
+				arrows: false,
+				breakpoints: {
+					767: {
+						perPage: 1,
+					},
+				},
+			};
+
+			let splide = new Splide(splides[i], splideOptions); // create splide instance with these options
+			splide.mount(window.splide.Extensions);
+		}
+	}
+	mount_splide_about(".splide.about-playlist");
 }
 
 function setupVideoElements() {
