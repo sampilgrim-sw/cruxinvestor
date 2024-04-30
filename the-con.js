@@ -70,6 +70,7 @@ function setupSplide() {
 			let splideOptions = {
 				perPage: 3,
 				gap: "1rem",
+				autoplay: false,
 				pauseOnHover: false,
 				arrows: true,
 				breakpoints: {
@@ -91,6 +92,7 @@ function setupSplide() {
 			let splideOptions = {
 				perPage: 3,
 				gap: "1rem",
+				autoplay: false,
 				autoScroll: {
 					speed: 2,
 					pauseOnHover: true,
