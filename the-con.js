@@ -92,7 +92,7 @@ function setupSplide() {
 			let splideOptions = {
 				perPage: 3,
 				gap: "1rem",
-				autoplay: false,
+				autoplay: "pause",
 				autoScroll: {
 					speed: 2,
 					pauseOnHover: true,
