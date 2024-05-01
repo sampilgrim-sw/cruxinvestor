@@ -13,11 +13,9 @@ function calculatePostReadTime() {
 
 	// Check if the elements exist
 	if (!articleElement) {
-		console.error("Error: Unable to find the article element.");
 		return; // Exit the function if no article element
 	}
 	if (!readTimeElement) {
-		console.error("Error: Unable to find the read time display element.");
 		return; // Exit the function if no read time element
 	}
 
@@ -36,10 +34,6 @@ function calculatePostReadTime() {
 
 	// Display the reading time in the read time element
 	readTimeElement.innerText = `${readingTime}m read time`;
-
-	console.log(
-		`This article has ${wordCount} words and will take approximately ${readingTime} minute(s) to read.`
-	);
 }
 
 function setupSplide() {
@@ -160,7 +154,6 @@ function initVimeo(vimeoContainer) {
 		vimeo_logo: false,
 	};
 
-	var videoPlayer = new Vimeo.Player("myVideo", options);
 	const player = new Vimeo.Player(vimeoContainer, options);
 
 	player.loadVideo(vimeoId).then(function (id) {
