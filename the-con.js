@@ -152,7 +152,15 @@ function toggleVideoElements(videoElement) {
 
 function initVimeo(vimeoContainer) {
 	const vimeoId = vimeoContainer.getAttribute("data-crux-vimeo-id");
-	const options = { id: vimeoId };
+	const options = {
+		id: vimeoId,
+		byline: false,
+		speed: true,
+		title: false,
+		vimeo_logo: false,
+	};
+
+	var videoPlayer = new Vimeo.Player("myVideo", options);
 	const player = new Vimeo.Player(vimeoContainer, options);
 
 	player.loadVideo(vimeoId).then(function (id) {
