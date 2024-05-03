@@ -298,9 +298,16 @@ function theCon() {
 			signUpDate = new Date(memberData.createdAt);
 		}
 
+		// Make sure to reset to start of the day for comparison
+		signUpDate.setHours(0, 0, 0, 0);
+
 		const currentDate = new Date();
-		const membershipDurationWeeks =
-			Math.floor((currentDate - signUpDate) / (7 * 24 * 60 * 60 * 1000)) + 1; // Adjust to start from week 1
+		currentDate.setHours(0, 0, 0, 0); // Set current date to start of the day for fair comparison
+
+		// Calculate membership duration in weeks, considering the start of the 8th day
+		const timeDiff = currentDate - signUpDate;
+		const daysSinceSignUp = Math.floor(timeDiff / (1000 * 3600 * 24));
+		const membershipDurationWeeks = Math.floor(daysSinceSignUp / 7) + 1;
 
 		document.querySelectorAll(".postcard").forEach((post) => {
 			updatePostCard(post, signUpDate, currentDate, membershipDurationWeeks);
@@ -313,13 +320,15 @@ function theCon() {
 		currentDate,
 		membershipDurationWeeks
 	) {
-		const postReleaseWeeks =
-			parseInt(post.getAttribute("data-post-release"), 10) - 1; // Adjust for zero-based indexing
-		const releaseDate = new Date(signUpDate.getTime());
-		releaseDate.setDate(releaseDate.getDate() + postReleaseWeeks * 7);
+		const postReleaseWeeks = parseInt(
+			post.getAttribute("data-post-release"),
+			10
+		);
+		const releaseDate = new Date(signUpDate);
+		releaseDate.setDate(releaseDate.getDate() + (postReleaseWeeks - 1) * 7); // Calculate expected release date
+		releaseDate.setHours(0, 0, 0, 0); // Set release date to start of the day
 
-		// add this release date to the post's hidden data
-		post.setAttribute("data-release-date", releaseDate);
+		post.setAttribute("data-release-date", releaseDate.toISOString());
 
 		const releaseTag = post.querySelector(".release-tag_wrapper");
 		const releaseTagText = post.querySelector(".release-tag_text");
