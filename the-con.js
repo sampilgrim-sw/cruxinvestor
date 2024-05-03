@@ -1,7 +1,7 @@
 function theCon() {
 	/* key MS / Vimeo stuff */
 	const progressMilestones = {}; // Object to store progress milestones for each course and episode
-	getMemberData();
+	fetchAndUpdateMemberUI();
 	setupVideoElements();
 
 	/* non MS stuff */
@@ -9,106 +9,7 @@ function theCon() {
 	calculatePostReadTime();
 	setupLoopElements();
 
-	function calculatePostReadTime() {
-		// Attempt to get the article text element
-		const articleElement = document.getElementById("transcript");
-		const readTimeElement = document.getElementById("read-time");
-
-		// Check if the elements exist
-		if (!articleElement) {
-			return; // Exit the function if no article element
-		}
-		if (!readTimeElement) {
-			return; // Exit the function if no read time element
-		}
-
-		// Get the text content from the article element
-		const articleText = articleElement.innerText;
-
-		// Split the text into an array of words
-		const wordsArray = articleText.split(" ");
-
-		// Count the number of words in the array
-		const wordCount = wordsArray.length;
-
-		// Calculate the estimated reading time
-		const wordsPerMinute = 200;
-		const readingTime = Math.ceil(wordCount / wordsPerMinute);
-
-		// Display the reading time in the read time element
-		readTimeElement.innerText = `${readingTime}m read time`;
-	}
-
-	function setupSplide() {
-		/* splide defaults */
-		Splide.defaults = {
-			perMove: 1,
-			gap: "0rem",
-			arrows: false,
-			pagination: false,
-			focus: 0,
-			speed: 600,
-			dragAngleThreshold: 60,
-			autoWidth: false,
-			rewind: false,
-			rewindSpeed: 400,
-			waitForTransition: false,
-			updateOnMove: true,
-			trimSpace: "move",
-			type: "loop",
-			drag: true,
-			snap: true,
-			autoWidth: false,
-			autoplay: true,
-		};
-
-		function mount_splide_home(myClass) {
-			let splides = document.querySelectorAll(myClass);
-			for (let i = 0; i < splides.length; i++) {
-				let splideOptions = {
-					perPage: 3,
-					gap: "1rem",
-					autoplay: false,
-					pauseOnHover: false,
-					arrows: true,
-					breakpoints: {
-						767: {
-							perPage: 1,
-						},
-					},
-				};
-
-				let splide = new Splide(splides[i], splideOptions); // create splide instance with these options
-				splide.mount();
-			}
-		}
-		mount_splide_home(".splide.home-playlist");
-
-		function mount_splide_about(myClass) {
-			let splides = document.querySelectorAll(myClass);
-			for (let i = 0; i < splides.length; i++) {
-				let splideOptions = {
-					perPage: 3,
-					gap: "1rem",
-					autoplay: "pause",
-					autoScroll: {
-						speed: 2,
-						pauseOnHover: true,
-					},
-					arrows: false,
-					breakpoints: {
-						767: {
-							perPage: 1,
-						},
-					},
-				};
-
-				let splide = new Splide(splides[i], splideOptions); // create splide instance with these options
-				splide.mount(window.splide.Extensions);
-			}
-		}
-		mount_splide_about(".splide.about-playlist");
-	}
+	/*** KEY FUNCTIONS ***/
 
 	function setupVideoElements() {
 		const videoElements = document.querySelectorAll(".video");
@@ -250,94 +151,266 @@ function theCon() {
 		}
 	}
 
-	function getMemberData() {
+	// function getMemberData_old() {
+	// 	window.$memberstackDom
+	// 		.getCurrentMember()
+	// 		.then((member) => {
+	// 			if (member.data) {
+	// 				console.log("Logged in member data:", member.data);
+
+	// 				let signUpDate;
+	// 				const signUpDateString = member.data.customFields["sign-up-date"];
+
+	// 				if (signUpDateString) {
+	// 					signUpDate = new Date(signUpDateString);
+	// 					if (isNaN(signUpDate.getTime())) {
+	// 						signUpDate = new Date(member.data.createdAt); // Fallback to creation date
+	// 						console.log(
+	// 							"Sign-up date is missing or undefined in custom fields, using creation date."
+	// 						);
+	// 					}
+	// 				} else {
+	// 					console.log(
+	// 						"Sign-up date is missing or undefined in custom fields, using creation date."
+	// 					);
+	// 					signUpDate = new Date(member.data.createdAt);
+	// 				}
+
+	// 				const currentDate = new Date();
+	// 				const membershipDurationWeeks =
+	// 					Math.floor((currentDate - signUpDate) / (7 * 24 * 60 * 60 * 1000)) +
+	// 					1; // Adjust to start from week 1
+
+	// 				document.querySelectorAll(".postcard").forEach((post) => {
+	// 					const postReleaseWeeks =
+	// 						parseInt(post.getAttribute("data-post-release"), 10) - 1; // Adjust for zero-based indexing
+	// 					const releaseDate = new Date(signUpDate.getTime());
+	// 					releaseDate.setDate(releaseDate.getDate() + postReleaseWeeks * 7);
+
+	// 					// add this release date to the post's hidden data
+	// 					post.setAttribute("data-release-date", releaseDate);
+
+	// 					const releaseTag = post.querySelector(".release-tag_wrapper");
+	// 					const releaseTagText = post.querySelector(".release-tag_text");
+	// 					const postStatus = post.getAttribute("data-post-status");
+	// 					const newTag = post.querySelector(".postcard_new");
+
+	// 					if (postStatus !== "available") {
+	// 						releaseTag.removeAttribute("hidden");
+	// 						releaseTagText.textContent = "Coming soon";
+	// 					} else if (membershipDurationWeeks >= postReleaseWeeks) {
+	// 						post.setAttribute("data-post-unlocked", "true");
+	// 						releaseTag.setAttribute("hidden", ""); // Hide tag using hidden attribute
+	// 						// Check if the video's release date is within the last 7 days
+	// 						if ((currentDate - releaseDate) / (1000 * 3600 * 24) <= 7) {
+	// 							newTag.removeAttribute("hidden"); // Show the 'new' tag
+	// 						} else {
+	// 							newTag.setAttribute("hidden", ""); // Hide the 'new' tag
+	// 						}
+	// 					} else {
+	// 						post.setAttribute("data-post-locked", "true");
+	// 						releaseTag.removeAttribute("hidden"); // Show tag by removing hidden attribute
+
+	// 						const daysUntilAvailable =
+	// 							(releaseDate - currentDate) / (1000 * 3600 * 24);
+	// 						if (daysUntilAvailable > 7) {
+	// 							const weeksUntilAvailable = Math.ceil(daysUntilAvailable / 7);
+	// 							releaseTagText.textContent = `Available in ${weeksUntilAvailable} weeks`;
+	// 						} else {
+	// 							releaseTagText.textContent = `Available in ${Math.ceil(
+	// 								daysUntilAvailable
+	// 							)} days`;
+	// 						}
+	// 					}
+	// 				});
+	// 			} else {
+	// 				console.log("No member logged in");
+	// 				document.querySelectorAll(".post").forEach((post) => {
+	// 					const releaseTag = post.querySelector(".release-tag");
+	// 					const releaseTagText = post.querySelector(".release-tag_text");
+	// 					const newTag = post.querySelector(".postcard_new");
+	// 					releaseTag.removeAttribute("hidden");
+	// 					releaseTagText.textContent = "Coming soon";
+	// 					newTag.setAttribute("hidden", ""); // Hide the 'new' tag
+	// 				});
+	// 			}
+	// 		})
+	// 		.catch((error) => {
+	// 			console.error("Error fetching member data:", error);
+	// 		});
+	// }
+
+	/**
+	 * Fetches member data including video progress and modifies the page content based on various member data fields.
+	 */
+	function fetchAndUpdateMemberUI() {
 		window.$memberstackDom
 			.getCurrentMember()
-			.then((member) => {
+			.then(async (member) => {
 				if (member.data) {
 					console.log("Logged in member data:", member.data);
 
-					let signUpDate;
-					const signUpDateString = member.data.customFields["sign-up-date"];
+					// Existing functionality to handle sign-up dates and release dates
+					handleSignUpAndReleaseDates(member.data);
 
-					if (signUpDateString) {
-						signUpDate = new Date(signUpDateString);
-						if (isNaN(signUpDate.getTime())) {
-							signUpDate = new Date(member.data.createdAt); // Fallback to creation date
-							console.log(
-								"Sign-up date is missing or undefined in custom fields, using creation date."
-							);
+					// Fetch the detailed JSON data containing course progress
+					const memberJson = await window.$memberstackDom.getMemberJSON(
+						member.id
+					);
+					if (memberJson && memberJson.data && memberJson.data.courses) {
+						const courses = memberJson.data.courses;
+						for (const [courseId, episodes] of Object.entries(courses)) {
+							for (const [episodeId, episodeData] of Object.entries(episodes)) {
+								updateEpisodeContent(courseId, episodeId, episodeData);
+							}
 						}
-					} else {
-						console.log(
-							"Sign-up date is missing or undefined in custom fields, using creation date."
-						);
-						signUpDate = new Date(member.data.createdAt);
 					}
-
-					const currentDate = new Date();
-					const membershipDurationWeeks =
-						Math.floor((currentDate - signUpDate) / (7 * 24 * 60 * 60 * 1000)) +
-						1; // Adjust to start from week 1
-
-					document.querySelectorAll(".postcard").forEach((post) => {
-						const postReleaseWeeks =
-							parseInt(post.getAttribute("data-post-release"), 10) - 1; // Adjust for zero-based indexing
-						const releaseDate = new Date(signUpDate.getTime());
-						releaseDate.setDate(releaseDate.getDate() + postReleaseWeeks * 7);
-
-						// add this release date to the post's hidden data
-						post.setAttribute("data-release-date", releaseDate);
-
-						const releaseTag = post.querySelector(".release-tag_wrapper");
-						const releaseTagText = post.querySelector(".release-tag_text");
-						const postStatus = post.getAttribute("data-post-status");
-						const newTag = post.querySelector(".postcard_new");
-
-						if (postStatus !== "available") {
-							releaseTag.removeAttribute("hidden");
-							releaseTagText.textContent = "Coming soon";
-						} else if (membershipDurationWeeks >= postReleaseWeeks) {
-							post.setAttribute("data-post-unlocked", "true");
-							releaseTag.setAttribute("hidden", ""); // Hide tag using hidden attribute
-							// Check if the video's release date is within the last 7 days
-							if ((currentDate - releaseDate) / (1000 * 3600 * 24) <= 7) {
-								newTag.removeAttribute("hidden"); // Show the 'new' tag
-							} else {
-								newTag.setAttribute("hidden", ""); // Hide the 'new' tag
-							}
-						} else {
-							post.setAttribute("data-post-locked", "true");
-							releaseTag.removeAttribute("hidden"); // Show tag by removing hidden attribute
-
-							const daysUntilAvailable =
-								(releaseDate - currentDate) / (1000 * 3600 * 24);
-							if (daysUntilAvailable > 7) {
-								const weeksUntilAvailable = Math.ceil(daysUntilAvailable / 7);
-								releaseTagText.textContent = `Available in ${weeksUntilAvailable} weeks`;
-							} else {
-								releaseTagText.textContent = `Available in ${Math.ceil(
-									daysUntilAvailable
-								)} days`;
-							}
-						}
-					});
 				} else {
 					console.log("No member logged in");
-					document.querySelectorAll(".post").forEach((post) => {
-						const releaseTag = post.querySelector(".release-tag");
-						const releaseTagText = post.querySelector(".release-tag_text");
-						const newTag = post.querySelector(".postcard_new");
-						releaseTag.removeAttribute("hidden");
-						releaseTagText.textContent = "Coming soon";
-						newTag.setAttribute("hidden", ""); // Hide the 'new' tag
-					});
+					handleLoggedOutState();
 				}
 			})
 			.catch((error) => {
 				console.error("Error fetching member data:", error);
 			});
 	}
+
+	/**
+	 * Handles the display of sign-up dates and modifies UI based on the membership duration and release dates.
+	 * @param {object} memberData - Data about the member.
+	 */
+	function handleSignUpAndReleaseDates(memberData) {
+		let signUpDate;
+		const signUpDateString = memberData.customFields["sign-up-date"];
+
+		if (signUpDateString) {
+			signUpDate = new Date(signUpDateString);
+			if (isNaN(signUpDate.getTime())) {
+				signUpDate = new Date(memberData.createdAt); // Fallback to creation date
+				console.log(
+					"Sign-up date is missing or undefined in custom fields, using creation date."
+				);
+			}
+		} else {
+			console.log(
+				"Sign-up date is missing or undefined in custom fields, using creation date."
+			);
+			signUpDate = new Date(memberData.createdAt);
+		}
+
+		const currentDate = new Date();
+		const membershipDurationWeeks =
+			Math.floor((currentDate - signUpDate) / (7 * 24 * 60 * 60 * 1000)) + 1; // Adjust to start from week 1
+
+		document.querySelectorAll(".postcard").forEach((post) => {
+			updatePostCard(post, signUpDate, currentDate, membershipDurationWeeks);
+		});
+	}
+
+	function updatePostCard(
+		post,
+		signUpDate,
+		currentDate,
+		membershipDurationWeeks
+	) {
+		const postReleaseWeeks =
+			parseInt(post.getAttribute("data-post-release"), 10) - 1; // Adjust for zero-based indexing
+		const releaseDate = new Date(signUpDate.getTime());
+		releaseDate.setDate(releaseDate.getDate() + postReleaseWeeks * 7);
+
+		// add this release date to the post's hidden data
+		post.setAttribute("data-release-date", releaseDate);
+
+		const releaseTag = post.querySelector(".release-tag_wrapper");
+		const releaseTagText = post.querySelector(".release-tag_text");
+		const postStatus = post.getAttribute("data-post-status");
+		const newTag = post.querySelector(".postcard_new");
+
+		if (postStatus !== "available") {
+			releaseTag.removeAttribute("hidden");
+			releaseTagText.textContent = "Coming soon";
+		} else if (membershipDurationWeeks >= postReleaseWeeks) {
+			post.setAttribute("data-post-unlocked", "true");
+			releaseTag.setAttribute("hidden", ""); // Hide tag using hidden attribute
+			// Check if the video's release date is within the last 7 days
+			if ((currentDate - releaseDate) / (1000 * 3600 * 24) <= 7) {
+				newTag.removeAttribute("hidden"); // Show the 'new' tag
+			} else {
+				newTag.setAttribute("hidden", ""); // Hide the 'new' tag
+			}
+		} else {
+			post.setAttribute("data-post-locked", "true");
+			releaseTag.removeAttribute("hidden"); // Show tag by removing hidden attribute
+
+			const daysUntilAvailable =
+				(releaseDate - currentDate) / (1000 * 3600 * 24);
+			if (daysUntilAvailable > 7) {
+				const weeksUntilAvailable = Math.ceil(daysUntilAvailable / 7);
+				releaseTagText.textContent = `Available in ${weeksUntilAvailable} weeks`;
+			} else {
+				releaseTagText.textContent = `Available in ${Math.ceil(
+					daysUntilAvailable
+				)} days`;
+			}
+		}
+	}
+
+	/**
+	 * Updates HTML content based on the progress of a video episode.
+	 * @param {string} courseId - The course identifier
+	 * @param {string} episodeId - The episode identifier
+	 * @param {object} episodeData - Data containing progress and other metadata
+	 */
+	function updateEpisodeContent(courseId, episodeId, episodeData) {
+		// Find all matching episode elements
+		const episodeElements = document.querySelectorAll(
+			`.postcard[data-post-number='${episodeId}'][data-course-name='${courseId}']`
+		);
+
+		if (episodeElements.length === 0) {
+			console.log(
+				`No HTML elements found for course ${courseId} episode ${episodeId}`
+			);
+		} else {
+			episodeElements.forEach((episodeElement) => {
+				const progressPercentage = Math.round(episodeData.progress * 100);
+
+				// Determine the watched status based on progress percentage
+				if (progressPercentage === 0) {
+					episodeElement.setAttribute("data-post-watched", "unwatched");
+					console.log(
+						`Episode ${episodeId} of course ${courseId} is set to unwatched.`
+					);
+				} else if (progressPercentage >= 90) {
+					episodeElement.setAttribute("data-post-watched", "watched");
+					console.log(
+						`Episode ${episodeId} of course ${courseId} is set to watched.`
+					);
+				} else {
+					episodeElement.setAttribute("data-post-watched", "in progress");
+					console.log(
+						`Episode ${episodeId} of course ${courseId} is in progress at ${progressPercentage}% watched.`
+					);
+				}
+			});
+		}
+	}
+
+	/**
+	 * Handles UI changes when no member is logged in.
+	 */
+	function handleLoggedOutState() {
+		document.querySelectorAll(".post").forEach((post) => {
+			const releaseTag = post.querySelector(".release-tag");
+			const releaseTagText = post.querySelector(".release-tag_text");
+			const newTag = post.querySelector(".postcard_new");
+			releaseTag.removeAttribute("hidden");
+			releaseTagText.textContent = "Coming soon";
+			newTag.setAttribute("hidden", "");
+		});
+	}
+
+	/*** OTHER FUNCTIONS ***/
 
 	function setupLoopElements() {
 		var loops = document.querySelectorAll(".loop");
@@ -384,5 +457,104 @@ function theCon() {
 				imgContainer.style.opacity = 0;
 			});
 		});
+	}
+	function calculatePostReadTime() {
+		// Attempt to get the article text element
+		const articleElement = document.getElementById("transcript");
+		const readTimeElement = document.getElementById("read-time");
+
+		// Check if the elements exist
+		if (!articleElement) {
+			return; // Exit the function if no article element
+		}
+		if (!readTimeElement) {
+			return; // Exit the function if no read time element
+		}
+
+		// Get the text content from the article element
+		const articleText = articleElement.innerText;
+
+		// Split the text into an array of words
+		const wordsArray = articleText.split(" ");
+
+		// Count the number of words in the array
+		const wordCount = wordsArray.length;
+
+		// Calculate the estimated reading time
+		const wordsPerMinute = 200;
+		const readingTime = Math.ceil(wordCount / wordsPerMinute);
+
+		// Display the reading time in the read time element
+		readTimeElement.innerText = `${readingTime}m read time`;
+	}
+	function setupSplide() {
+		/* splide defaults */
+		Splide.defaults = {
+			perMove: 1,
+			gap: "0rem",
+			arrows: false,
+			pagination: false,
+			focus: 0,
+			speed: 600,
+			dragAngleThreshold: 60,
+			autoWidth: false,
+			rewind: false,
+			rewindSpeed: 400,
+			waitForTransition: false,
+			updateOnMove: true,
+			trimSpace: "move",
+			type: "loop",
+			drag: true,
+			snap: true,
+			autoWidth: false,
+			autoplay: true,
+		};
+
+		function mount_splide_home(myClass) {
+			let splides = document.querySelectorAll(myClass);
+			for (let i = 0; i < splides.length; i++) {
+				let splideOptions = {
+					perPage: 3,
+					gap: "1rem",
+					autoplay: false,
+					pauseOnHover: false,
+					arrows: true,
+					breakpoints: {
+						767: {
+							perPage: 1,
+						},
+					},
+				};
+
+				let splide = new Splide(splides[i], splideOptions); // create splide instance with these options
+				splide.mount();
+			}
+		}
+		mount_splide_home(".splide.home-playlist");
+
+		function mount_splide_about(myClass) {
+			let splides = document.querySelectorAll(myClass);
+			for (let i = 0; i < splides.length; i++) {
+				let splideOptions = {
+					perPage: 3,
+					gap: "1rem",
+					autoplay: "pause",
+					autoScroll: {
+						speed: 2,
+						pauseOnHover: true,
+					},
+					arrows: false,
+					breakpoints: {
+						767: {
+							perPage: 1,
+						},
+					},
+				};
+
+				let splide = new Splide(splides[i], splideOptions); // create splide instance with these options
+				splide.mount(window.splide.Extensions);
+			}
+		}
+		mount_splide_about(".splide.about-playlist");
 	}
 }
