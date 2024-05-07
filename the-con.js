@@ -1,7 +1,15 @@
 function theCon() {
 	/* key MS / Vimeo stuff */
 	const progressMilestones = {}; // Object to store progress milestones for each course and episode
-	fetchAndUpdateMemberUI();
+
+	// Start by fetching and updating the UI, then display chapter progress
+	fetchAndUpdateMemberUI()
+		.then(() => {
+			displayChapterProgress(); // Ensure this runs after Memberstack data is fully loaded and processed
+		})
+		.catch((error) => {
+			console.error("Error in fetching/updating Memberstack data:", error);
+		});
 	setupVideoElements();
 
 	/* non MS stuff */
@@ -151,128 +159,37 @@ function theCon() {
 		}
 	}
 
-	// function getMemberData_old() {
-	// 	window.$memberstackDom
-	// 		.getCurrentMember()
-	// 		.then((member) => {
-	// 			if (member.data) {
-	// 				console.log("Logged in member data:", member.data);
-
-	// 				let signUpDate;
-	// 				const signUpDateString = member.data.customFields["sign-up-date"];
-
-	// 				if (signUpDateString) {
-	// 					signUpDate = new Date(signUpDateString);
-	// 					if (isNaN(signUpDate.getTime())) {
-	// 						signUpDate = new Date(member.data.createdAt); // Fallback to creation date
-	// 						console.log(
-	// 							"Sign-up date is missing or undefined in custom fields, using creation date."
-	// 						);
-	// 					}
-	// 				} else {
-	// 					console.log(
-	// 						"Sign-up date is missing or undefined in custom fields, using creation date."
-	// 					);
-	// 					signUpDate = new Date(member.data.createdAt);
-	// 				}
-
-	// 				const currentDate = new Date();
-	// 				const membershipDurationWeeks =
-	// 					Math.floor((currentDate - signUpDate) / (7 * 24 * 60 * 60 * 1000)) +
-	// 					1; // Adjust to start from week 1
-
-	// 				document.querySelectorAll(".postcard").forEach((post) => {
-	// 					const postReleaseWeeks =
-	// 						parseInt(post.getAttribute("data-post-release"), 10) - 1; // Adjust for zero-based indexing
-	// 					const releaseDate = new Date(signUpDate.getTime());
-	// 					releaseDate.setDate(releaseDate.getDate() + postReleaseWeeks * 7);
-
-	// 					// add this release date to the post's hidden data
-	// 					post.setAttribute("data-release-date", releaseDate);
-
-	// 					const releaseTag = post.querySelector(".release-tag_wrapper");
-	// 					const releaseTagText = post.querySelector(".release-tag_text");
-	// 					const postStatus = post.getAttribute("data-post-status");
-	// 					const newTag = post.querySelector(".postcard_new");
-
-	// 					if (postStatus !== "available") {
-	// 						releaseTag.removeAttribute("hidden");
-	// 						releaseTagText.textContent = "Coming soon";
-	// 					} else if (membershipDurationWeeks >= postReleaseWeeks) {
-	// 						post.setAttribute("data-post-unlocked", "true");
-	// 						releaseTag.setAttribute("hidden", ""); // Hide tag using hidden attribute
-	// 						// Check if the video's release date is within the last 7 days
-	// 						if ((currentDate - releaseDate) / (1000 * 3600 * 24) <= 7) {
-	// 							newTag.removeAttribute("hidden"); // Show the 'new' tag
-	// 						} else {
-	// 							newTag.setAttribute("hidden", ""); // Hide the 'new' tag
-	// 						}
-	// 					} else {
-	// 						post.setAttribute("data-post-locked", "true");
-	// 						releaseTag.removeAttribute("hidden"); // Show tag by removing hidden attribute
-
-	// 						const daysUntilAvailable =
-	// 							(releaseDate - currentDate) / (1000 * 3600 * 24);
-	// 						if (daysUntilAvailable > 7) {
-	// 							const weeksUntilAvailable = Math.ceil(daysUntilAvailable / 7);
-	// 							releaseTagText.textContent = `Available in ${weeksUntilAvailable} weeks`;
-	// 						} else {
-	// 							releaseTagText.textContent = `Available in ${Math.ceil(
-	// 								daysUntilAvailable
-	// 							)} days`;
-	// 						}
-	// 					}
-	// 				});
-	// 			} else {
-	// 				console.log("No member logged in");
-	// 				document.querySelectorAll(".post").forEach((post) => {
-	// 					const releaseTag = post.querySelector(".release-tag");
-	// 					const releaseTagText = post.querySelector(".release-tag_text");
-	// 					const newTag = post.querySelector(".postcard_new");
-	// 					releaseTag.removeAttribute("hidden");
-	// 					releaseTagText.textContent = "Coming soon";
-	// 					newTag.setAttribute("hidden", ""); // Hide the 'new' tag
-	// 				});
-	// 			}
-	// 		})
-	// 		.catch((error) => {
-	// 			console.error("Error fetching member data:", error);
-	// 		});
-	// }
-
 	/**
 	 * Fetches member data including video progress and modifies the page content based on various member data fields.
 	 */
-	function fetchAndUpdateMemberUI() {
-		window.$memberstackDom
-			.getCurrentMember()
-			.then(async (member) => {
-				if (member.data) {
-					console.log("Logged in member data:", member.data);
+	// Make fetchAndUpdateMemberUI async to handle the completion properly
+	async function fetchAndUpdateMemberUI() {
+		try {
+			const member = await window.$memberstackDom.getCurrentMember();
+			if (member.data) {
+				console.log("Logged in member data:", member.data);
 
-					// Existing functionality to handle sign-up dates and release dates
-					handleSignUpAndReleaseDates(member.data);
+				handleSignUpAndReleaseDates(member.data);
 
-					// Fetch the detailed JSON data containing course progress
-					const memberJson = await window.$memberstackDom.getMemberJSON(
-						member.id
-					);
-					if (memberJson && memberJson.data && memberJson.data.courses) {
-						const courses = memberJson.data.courses;
-						for (const [courseId, episodes] of Object.entries(courses)) {
-							for (const [episodeId, episodeData] of Object.entries(episodes)) {
-								updateEpisodeContent(courseId, episodeId, episodeData);
-							}
+				const memberJson = await window.$memberstackDom.getMemberJSON(
+					member.id
+				);
+				if (memberJson && memberJson.data && memberJson.data.courses) {
+					const courses = memberJson.data.courses;
+					for (const [courseId, episodes] of Object.entries(courses)) {
+						for (const [episodeId, episodeData] of Object.entries(episodes)) {
+							updateEpisodeContent(courseId, episodeId, episodeData);
 						}
 					}
-				} else {
-					console.log("No member logged in");
-					handleLoggedOutState();
 				}
-			})
-			.catch((error) => {
-				console.error("Error fetching member data:", error);
-			});
+			} else {
+				console.log("No member logged in");
+				handleLoggedOutState();
+			}
+		} catch (error) {
+			console.error("Error fetching member data:", error);
+			throw error; // Rethrow to handle it in the calling .then/.catch
+		}
 	}
 
 	/**
@@ -387,22 +304,85 @@ function theCon() {
 				// Determine the watched status based on progress percentage
 				if (progressPercentage === 0) {
 					episodeElement.setAttribute("data-post-watched", "unwatched");
+					episodeElement.setAttribute("data-post-progress", 0);
 					console.log(
 						`Episode ${episodeId} of course ${courseId} is set to unwatched.`
 					);
 				} else if (progressPercentage >= 90) {
 					episodeElement.setAttribute("data-post-watched", "watched");
+					episodeElement.setAttribute("data-post-progress", 100);
 					console.log(
 						`Episode ${episodeId} of course ${courseId} is set to watched.`
 					);
 				} else {
 					episodeElement.setAttribute("data-post-watched", "in progress");
+					episodeElement.setAttribute("data-post-progress", progressPercentage);
 					console.log(
 						`Episode ${episodeId} of course ${courseId} is in progress at ${progressPercentage}% watched.`
 					);
 				}
 			});
 		}
+	}
+
+	/* update dashboard progress component */
+	function displayChapterProgress() {
+		// Check if the dashboard progress component exists
+		const dashboardProgress = document.querySelector(".dashboard-progress");
+		if (!dashboardProgress) {
+			console.log("Dashboard progress component not found.");
+			return; // Exit if there's no dashboard progress component
+		}
+
+		// Object to store aggregated progress data by chapter
+		const chapters = {};
+
+		// Aggregate progress data from each postcard on the page
+		document.querySelectorAll(".postcard").forEach((postcard) => {
+			const chapter = postcard.getAttribute("data-post-chapter");
+			const progress = parseFloat(postcard.getAttribute("data-post-progress")); // Ensure your postcards have a 'data-progress' attribute
+			if (!chapters[chapter]) {
+				chapters[chapter] = {
+					totalProgress: 0,
+					count: 0,
+				};
+			}
+
+			chapters[chapter].totalProgress += progress;
+			chapters[chapter].count++;
+		});
+
+		// Calculate and update progress for each chapter
+		Object.keys(chapters).forEach((chapter) => {
+			const avgProgress =
+				chapters[chapter].count > 0
+					? chapters[chapter].totalProgress / chapters[chapter].count
+					: 0;
+			const chapterElements = document.querySelectorAll(
+				`.chapter[data-chapter="${chapter}"]`
+			);
+
+			chapterElements.forEach((chapterElement) => {
+				const progressBar = chapterElement.querySelector(
+					".chapter_progress-bar"
+				);
+				const progressNum = chapterElement.querySelector(
+					".chapter_progress-num"
+				);
+
+				if (progressBar) {
+					// Update the width of the :after pseudo-element via inline style
+					progressBar.style.setProperty("--progress", avgProgress / 100); // Assuming CSS uses this variable for scaling
+				}
+
+				if (progressNum) {
+					progressNum.textContent = `${avgProgress.toFixed(0)}%`;
+				}
+
+				// Update the data-progress attribute for the chapter element
+				chapterElement.setAttribute("data-progress", avgProgress.toFixed(0));
+			});
+		});
 	}
 
 	/**
