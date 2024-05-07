@@ -81,7 +81,7 @@ function theCon() {
 
 	function trackVimeo(player, videoElement) {
 		const course = videoElement.getAttribute("data-course-name");
-		const episode = videoElement.getAttribute("data-episode-number");
+		const episode = videoElement.getAttribute("data-post-id");
 
 		player.on("timeupdate", function (data) {
 			const progress = data.seconds / data.duration;
@@ -177,8 +177,8 @@ function theCon() {
 				if (memberJson && memberJson.data && memberJson.data.courses) {
 					const courses = memberJson.data.courses;
 					for (const [courseId, episodes] of Object.entries(courses)) {
-						for (const [episodeId, episodeData] of Object.entries(episodes)) {
-							updateEpisodeContent(courseId, episodeId, episodeData);
+						for (const [episode, episodeData] of Object.entries(episodes)) {
+							updateEpisodeContent(courseId, episode, episodeData);
 						}
 					}
 				}
@@ -287,15 +287,15 @@ function theCon() {
 	 * @param {string} episodeId - The episode identifier
 	 * @param {object} episodeData - Data containing progress and other metadata
 	 */
-	function updateEpisodeContent(courseId, episodeId, episodeData) {
+	function updateEpisodeContent(courseId, episode, episodeData) {
 		// Find all matching episode elements
 		const episodeElements = document.querySelectorAll(
-			`.postcard[data-post-number='${episodeId}'][data-course-name='${courseId}']`
+			`.postcard[data-post-id='${episode}'][data-course-name='${courseId}']`
 		);
 
 		if (episodeElements.length === 0) {
 			console.log(
-				`No HTML elements found for course ${courseId} episode ${episodeId}`
+				`No HTML elements found for course ${courseId} episode ${episode}`
 			);
 		} else {
 			episodeElements.forEach((episodeElement) => {
@@ -306,19 +306,19 @@ function theCon() {
 					episodeElement.setAttribute("data-post-watched", "unwatched");
 					episodeElement.setAttribute("data-post-progress", 0);
 					console.log(
-						`Episode ${episodeId} of course ${courseId} is set to unwatched.`
+						`Episode ${episode} of course ${courseId} is set to unwatched.`
 					);
 				} else if (progressPercentage >= 90) {
 					episodeElement.setAttribute("data-post-watched", "watched");
 					episodeElement.setAttribute("data-post-progress", 100);
 					console.log(
-						`Episode ${episodeId} of course ${courseId} is set to watched.`
+						`Episode ${episode} of course ${courseId} is set to watched.`
 					);
 				} else {
 					episodeElement.setAttribute("data-post-watched", "in progress");
 					episodeElement.setAttribute("data-post-progress", progressPercentage);
 					console.log(
-						`Episode ${episodeId} of course ${courseId} is in progress at ${progressPercentage}% watched.`
+						`Episode ${episode} of course ${courseId} is in progress at ${progressPercentage}% watched.`
 					);
 				}
 			});
