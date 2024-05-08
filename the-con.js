@@ -6,6 +6,7 @@ function theCon() {
 	fetchAndUpdateMemberUI()
 		.then(() => {
 			displayChapterProgress(); // Ensure this runs after Memberstack data is fully loaded and processed
+			updateLatestButton(); // point Latest Button to correct episode
 		})
 		.catch((error) => {
 			console.error("Error in fetching/updating Memberstack data:", error);
@@ -340,7 +341,7 @@ function theCon() {
 		// Aggregate progress data from each postcard on the page
 		document.querySelectorAll(".postcard").forEach((postcard) => {
 			const chapter = postcard.getAttribute("data-post-chapter");
-			const progress = parseFloat(postcard.getAttribute("data-post-progress")); // Ensure your postcards have a 'data-progress' attribute
+			const progress = parseFloat(postcard.getAttribute("data-post-progress"));
 			if (!chapters[chapter]) {
 				chapters[chapter] = {
 					totalProgress: 0,
@@ -372,7 +373,7 @@ function theCon() {
 
 				if (progressBar) {
 					// Update the width of the :after pseudo-element via inline style
-					progressBar.style.setProperty("--progress", avgProgress / 100); // Assuming CSS uses this variable for scaling
+					progressBar.style.setProperty("--progress", avgProgress / 100);
 				}
 
 				if (progressNum) {
@@ -383,6 +384,28 @@ function theCon() {
 				chapterElement.setAttribute("data-progress", avgProgress.toFixed(0));
 			});
 		});
+	}
+	function updateLatestButton() {
+		// Check if the btn exists
+		const btn = document.getElementById("btn-latest");
+		if (!btn) {
+			console.log("Latest btn not found.");
+			return; // Exit if there's no dashboard progress component
+		}
+
+		let latestSlug = "";
+		const postcards = document.querySelectorAll(".postcard");
+		for (const postcard of postcards) {
+			const progress = parseFloat(postcard.getAttribute("data-post-progress"));
+			if (progress < 90) {
+				latestSlug = postcard.getAttribute("data-post-slug");
+				break;
+			}
+		}
+
+		btn.querySelector("#btn-latest-icon").removeAttribute("hidden");
+		btn.querySelector("#btn-latest-text").innerText = "Watch latest episode";
+		btn.setAttribute("href", `/posts/${latestSlug}`);
 	}
 
 	/**
