@@ -148,7 +148,7 @@ function theCon() {
 					});
 
 					// Optionally log the updated JSON data to verify
-					const updatedJson = await memberstack.getMemberJSON(memberId);
+					// const updatedJson = await memberstack.getMemberJSON(memberId);
 					console.log(
 						`Saved progress at ${milestone}% for episode ${episode} on ${memberData.data.courses[course][episode].last_watched}`
 					);
