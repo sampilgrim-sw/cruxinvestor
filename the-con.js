@@ -62,9 +62,10 @@ function theCon() {
 		const options = {
 			id: vimeoId,
 			byline: false,
-			speed: true,
 			title: false,
 			vimeo_logo: false,
+			autoplay: true /* play Vimeo once custom play button clicked */,
+			speed: false /* disable speed controls to avoid API issues */,
 		};
 
 		const player = new Vimeo.Player(vimeoContainer, options);
