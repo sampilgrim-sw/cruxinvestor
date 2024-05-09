@@ -86,7 +86,8 @@ function theCon() {
 
 		player.on("timeupdate", function (data) {
 			const progress = data.seconds / data.duration;
-			saveProgress(course, episode, progress);
+			// Update progress only at 20% increments
+			saveProgress(course, episode, progress, 20); // Added a new parameter for increment
 		});
 	}
 
@@ -98,7 +99,7 @@ function theCon() {
 	 * @param {number} progress - The progress percentage of the video
 	 */
 
-	async function saveProgress(course, episode, progress) {
+	async function saveProgress(course, episode, progress, increment = 10) {
 		const memberstack = window.$memberstackDom;
 
 		try {
@@ -109,7 +110,7 @@ function theCon() {
 
 				// Calculate the percentage watched, rounded to the nearest 10
 				const percentageWatched = Math.round(progress * 100);
-				const milestone = Math.round(percentageWatched / 10) * 10;
+				const milestone = Math.round(percentageWatched / increment) * increment;
 
 				// Construct a unique key for the current course and episode
 				const progressKey = `${course}-${episode}`;
@@ -309,7 +310,7 @@ function theCon() {
 					console.log(
 						`Episode ${episode} of course ${courseId} is set to unwatched.`
 					);
-				} else if (progressPercentage >= 90) {
+				} else if (progressPercentage >= 80) {
 					episodeElement.setAttribute("data-post-watched", "watched");
 					episodeElement.setAttribute("data-post-progress", 100);
 					console.log(
@@ -397,7 +398,7 @@ function theCon() {
 		const postcards = document.querySelectorAll(".postcard");
 		for (const postcard of postcards) {
 			const progress = parseFloat(postcard.getAttribute("data-post-progress"));
-			if (progress < 90) {
+			if (progress < 80) {
 				latestSlug = postcard.getAttribute("data-post-slug");
 				break;
 			}
