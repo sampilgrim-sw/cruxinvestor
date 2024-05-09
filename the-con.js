@@ -72,6 +72,7 @@ function theCon() {
 
 		player.loadVideo(vimeoId).then(function (id) {
 			console.log(`video ${id} has loaded 🥳`);
+			player.play();
 		});
 
 		player.on("play", (event) => {
