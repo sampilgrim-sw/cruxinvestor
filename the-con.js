@@ -64,7 +64,6 @@ function theCon() {
 			byline: false,
 			title: false,
 			vimeo_logo: false,
-			muted: true, // can only autoplay muted videos
 			autoplay: true /* play Vimeo once custom play button clicked */,
 			speed: false /* disable speed controls to avoid API issues */,
 		};
@@ -73,23 +72,6 @@ function theCon() {
 
 		player.loadVideo(vimeoId).then(function (id) {
 			console.log(`video ${id} has loaded 🥳`);
-			// player.play();
-			// unmute video
-			player
-				.setVolume(0.5)
-				.then(function (volume) {
-					// The volume is set
-				})
-				.catch(function (error) {
-					switch (error.name) {
-						case "RangeError":
-							// The volume is less than 0 or greater than 1
-							break;
-						default:
-							// Some other error occurred
-							break;
-					}
-				});
 		});
 
 		player.on("play", (event) => {
@@ -315,9 +297,9 @@ function theCon() {
 		);
 
 		if (episodeElements.length === 0) {
-			console.log(
+			/*console.log(
 				`No HTML elements found for course ${courseId} episode ${episode}`
-			);
+			);*/
 		} else {
 			episodeElements.forEach((episodeElement) => {
 				const progressPercentage = Math.round(episodeData.progress * 100);
