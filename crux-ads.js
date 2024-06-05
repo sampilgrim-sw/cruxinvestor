@@ -51,9 +51,6 @@ async function populateAdverts() {
 	const slotElements = document.querySelectorAll(".advert-slot");
 	const adverts = document.querySelectorAll(".adverts .advert");
 
-	console.log(slotElements);
-	console.log(adverts);
-
 	// Prepare advert info
 	const advertInfos = await Promise.all(
 		[...adverts].map(async (advert) => {

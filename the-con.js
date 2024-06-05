@@ -170,7 +170,7 @@ function theCon() {
 		try {
 			const member = await window.$memberstackDom.getCurrentMember();
 			if (member.data) {
-				console.log("Logged in member data:", member.data);
+				// console.log("Logged in member data:", member.data);
 
 				handleSignUpAndReleaseDates(member.data);
 
@@ -207,14 +207,14 @@ function theCon() {
 			signUpDate = new Date(signUpDateString);
 			if (isNaN(signUpDate.getTime())) {
 				signUpDate = new Date(memberData.createdAt); // Fallback to creation date
-				console.log(
-					"Sign-up date is missing or undefined in custom fields, using creation date."
-				);
+				// console.log(
+				// 	"Sign-up date is missing or undefined in custom fields, using creation date."
+				// );
 			}
 		} else {
-			console.log(
-				"Sign-up date is missing or undefined in custom fields, using creation date."
-			);
+			// console.log(
+			// 	"Sign-up date is missing or undefined in custom fields, using creation date."
+			// );
 			signUpDate = new Date(memberData.createdAt);
 		}
 
